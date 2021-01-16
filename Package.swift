@@ -12,6 +12,11 @@ let package = Package(
   ],
   targets: [
     .target(name: "cgtcalc"),
+    .target(name: "DataFormat"),
+    .testTarget(name: "DataFormatTests",
+                dependencies: [
+                  .target(name: "DataFormat"),
+                ]),
   ],
   swiftLanguageVersions: [.v5]
 )
