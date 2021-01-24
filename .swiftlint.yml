@@ -1,3 +1,7 @@
 line_length: 120
 disabled_rules:
   - trailing_comma
+excluded:
+  - Tests/*/XCTestManifests.swift
+  - Tests/LinuxMain.swift
+  - .build/
