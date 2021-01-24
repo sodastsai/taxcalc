@@ -13,7 +13,7 @@ public struct Currency {
 }
 
 public extension Currency {
-  enum Unit {
+  enum Unit: String {
     case GBP
     case USD
   }

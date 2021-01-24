@@ -10,9 +10,18 @@ let package = Package(
   products: [
     .executable(name: "cgtcalc", targets: ["cgtcalc"]),
   ],
+  dependencies: [
+    .package(url: "https://github.com/sodastsai/hmrc-fx.git", from: "0.2.0"),
+  ],
   targets: [
-    .target(name: "cgtcalc"),
-    .target(name: "DataFormat"),
+    .target(name: "cgtcalc",
+            dependencies: [
+              .target(name: "DataFormat"),
+            ]),
+    .target(name: "DataFormat",
+            dependencies: [
+              .product(name: "HMRCExchangeRate", package: "hmrc-fx"),
+            ]),
     .testTarget(name: "DataFormatTests",
                 dependencies: [
                   .target(name: "DataFormat"),

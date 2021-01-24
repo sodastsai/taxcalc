@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "hmrc-fx",
+        "repositoryURL": "https://github.com/sodastsai/hmrc-fx.git",
+        "state": {
+          "branch": null,
+          "revision": "5a45e03b9b0438dbfa099516c73efc842ea1ee18",
+          "version": "0.2.2"
+        }
+      },
+      {
+        "package": "SWXMLHash",
+        "repositoryURL": "https://github.com/drmohundro/SWXMLHash.git",
+        "state": {
+          "branch": null,
+          "revision": "a4931e5c3bafbedeb1601d3bb76bbe835c6d475a",
+          "version": "5.0.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
