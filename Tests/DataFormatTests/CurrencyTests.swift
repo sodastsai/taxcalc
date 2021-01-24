@@ -4,16 +4,28 @@ import XCTest
 
 class CurrencyTests: XCTestCase {
   func testStringRepresentationOfPound() {
-    let gbp1 = Currency(amount: Decimal(string: "3.20")!, unit: .GBP)
+    guard let gbp1 = Currency(amount: "3.20", unit: .GBP) else {
+      XCTFail("Failed to instantiate a Currency instance")
+      return
+    }
     XCTAssertEqual("\(gbp1)", "£3.20")
-    let gbp2 = Currency(amount: Decimal(string: "-1024.32")!, unit: .GBP)
+    guard let gbp2 = Currency(amount: "-1024.32", unit: .GBP) else {
+      XCTFail("Failed to instantiate a Currency instance")
+      return
+    }
     XCTAssertEqual("\(gbp2)", "-£1,024.32")
   }
 
   func testStringRepresentationOfDollar() {
-    let usd1 = Currency(amount: Decimal(string: "3.20")!, unit: .USD)
+    guard let usd1 = Currency(amount: "3.20", unit: .USD) else {
+      XCTFail("Failed to instantiate a Currency instance")
+      return
+    }
     XCTAssertEqual("\(usd1)", "$3.20")
-    let usd2 = Currency(amount: Decimal(string: "-1024.32")!, unit: .USD)
+    guard let usd2 = Currency(amount: "-1024.32", unit: .USD) else {
+      XCTFail("Failed to instantiate a Currency instance")
+      return
+    }
     XCTAssertEqual("\(usd2)", "-$1,024.32")
   }
 }

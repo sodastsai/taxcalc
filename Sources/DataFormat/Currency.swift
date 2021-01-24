@@ -19,6 +19,15 @@ public extension Currency {
   }
 }
 
+public extension Currency {
+  init?(amount: String, unit: Unit, time: Date? = nil) {
+    guard let decimalAmount = Decimal(string: amount) else {
+      return nil
+    }
+    self = .init(amount: decimalAmount, unit: unit, time: time)
+  }
+}
+
 extension Currency: CustomStringConvertible {
   public var description: String {
     unit.numberFormatter.string(for: amount) ?? ""
