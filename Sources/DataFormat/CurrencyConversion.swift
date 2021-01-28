@@ -19,7 +19,7 @@ extension Currency {
       return 1
     }
     switch (currentUnit, anotherUnit) {
-    case (.GBP, let queryingRate), (let queryingRate, .GBP):
+    case let (.GBP, queryingRate), let (queryingRate, .GBP):
       guard let rate = RateSource.directHMRC.rate(of: queryingRate.rawValue, at: time)?.first?.rate else {
         throw ConversionError.failedToQuery(queryingRate)
       }
