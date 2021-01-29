@@ -7,7 +7,7 @@ public extension Currency {
     case failedToQuery(Unit)
   }
 
-  func convert(to anotherUnit: Unit) throws -> Currency {
+  func converting(to anotherUnit: Unit) throws -> Currency {
     let rate = try getRate(from: unit, to: anotherUnit)
     return Currency(amount: amount * rate, unit: anotherUnit, time: time)
   }
