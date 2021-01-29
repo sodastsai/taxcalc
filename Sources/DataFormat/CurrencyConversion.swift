@@ -14,13 +14,13 @@ public extension Currency {
 }
 
 extension Currency {
-  func getRate(from currentUnit: Unit, to anotherUnit: Unit) throws -> Decimal {
+  func getRate(from currentUnit: Unit, to anotherUnit: Unit, via source: RateSource = .directHMRC) throws -> Decimal {
     guard currentUnit != anotherUnit else {
       return 1
     }
     switch (currentUnit, anotherUnit) {
     case let (.GBP, queryingRate), let (queryingRate, .GBP):
-      guard let rate = RateSource.directHMRC.rate(of: queryingRate.rawValue, at: time)?.first?.rate else {
+      guard let rate = source.rate(of: queryingRate.rawValue, at: time)?.first?.rate else {
         throw ConversionError.failedToQuery(queryingRate)
       }
       return currentUnit == .GBP ? rate : 1 / rate
