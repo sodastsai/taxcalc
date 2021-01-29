@@ -6,17 +6,17 @@
         "repositoryURL": "https://github.com/sodastsai/hmrc-fx.git",
         "state": {
           "branch": null,
-          "revision": "5a45e03b9b0438dbfa099516c73efc842ea1ee18",
-          "version": "0.2.2"
+          "revision": "6d97c34e489fc36ba4c883860132ad6381066544",
+          "version": "0.3.0"
         }
       },
       {
-        "package": "SWXMLHash",
-        "repositoryURL": "https://github.com/drmohundro/SWXMLHash.git",
+        "package": "XMLCoder",
+        "repositoryURL": "https://github.com/MaxDesiatov/XMLCoder.git",
         "state": {
           "branch": null,
-          "revision": "a4931e5c3bafbedeb1601d3bb76bbe835c6d475a",
-          "version": "5.0.1"
+          "revision": "b8fa7fe4c0849f8a64cc246e71c5d976809222e4",
+          "version": "0.12.0"
         }
       }
     ]
