@@ -11,7 +11,7 @@ let package = Package(
     .executable(name: "cgtcalc", targets: ["cgtcalc"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/sodastsai/hmrc-fx.git", from: "0.2.0"),
+    .package(url: "https://github.com/sodastsai/hmrc-fx.git", from: "0.4.0"),
   ],
   targets: [
     .target(name: "cgtcalc",

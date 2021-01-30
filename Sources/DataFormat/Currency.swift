@@ -16,6 +16,7 @@ public extension Currency {
   enum Unit: String {
     case GBP
     case USD
+    case TWD
   }
 }
 
@@ -49,12 +50,21 @@ private extension Currency.Unit {
     return formatter
   }()
 
+  static let twdNumberFormatter: NumberFormatter = {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .currency
+    formatter.locale = .init(identifier: "zh_TW")
+    return formatter
+  }()
+
   var numberFormatter: NumberFormatter {
     switch self {
     case .GBP:
       return Self.gbpNumberFormatter
     case .USD:
       return Self.usdNumberFormatter
+    case .TWD:
+      return Self.twdNumberFormatter
     }
   }
 }

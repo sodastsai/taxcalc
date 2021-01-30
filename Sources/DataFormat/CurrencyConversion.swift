@@ -3,29 +3,36 @@ import HMRCExchangeRate
 
 public extension Currency {
   enum ConversionError: Error {
-    case unsupportedConversion
+    case unsupportedConversion(Unit, Unit)
     case failedToQuery(Unit)
   }
 
-  func converting(to anotherUnit: Unit) throws -> Currency {
-    let rate = try getRate(from: unit, to: anotherUnit)
-    return Currency(amount: amount * rate, unit: anotherUnit, time: time)
+  func converting(to anotherUnit: Unit, via source: RateSource = .directHMRC) throws -> Currency {
+    let conversion = try getConversion(from: unit, to: anotherUnit, via: source)
+    return Currency(amount: conversion(amount), unit: anotherUnit, time: time)
   }
 }
 
 extension Currency {
-  func getRate(from currentUnit: Unit, to anotherUnit: Unit, via source: RateSource = .directHMRC) throws -> Decimal {
+  typealias AmountConverter = (Decimal) -> Decimal
+
+  func getConversion(from currentUnit: Unit, to anotherUnit: Unit,
+                     via source: RateSource) throws -> AmountConverter {
     guard currentUnit != anotherUnit else {
-      return 1
+      return { $0 }
     }
     switch (currentUnit, anotherUnit) {
-    case let (.GBP, queryingRate), let (queryingRate, .GBP):
-      guard let rate = source.rate(of: queryingRate.rawValue, at: time)?.first?.rate else {
-        throw ConversionError.failedToQuery(queryingRate)
+    case let (.GBP, queryingUnit), let (queryingUnit, .GBP):
+      guard let rate = source.rate(of: queryingUnit.rawValue, at: time)?.first?.rate else {
+        throw ConversionError.failedToQuery(queryingUnit)
       }
-      return currentUnit == .GBP ? rate : 1 / rate
+      if currentUnit == .GBP {
+        return { $0 * rate }
+      } else {
+        return { $0 / rate }
+      }
     case (_, _):
-      throw ConversionError.unsupportedConversion
+      throw ConversionError.unsupportedConversion(currentUnit, anotherUnit)
     }
   }
 }
