@@ -1,0 +1,6 @@
+Symbol,Quantity,Price,Action,Description,TradeDate,SettledDate,Interest,Amount,Commission,Fee,CUSIP,RecordType
+            ,0.00,,Other,Wire Funds Received,2018-10-29,2018-10-29,0.00,2000.00,0.00,0.00,         ,Financial
+QQQ         ,-1.00,164.21001,SELL,INVESCO QQQ TR                 UNIT SER 1                     INTERNET ORDER                 UNSOLICITED                    SHORT.,2018-10-30,2018-11-01,0.00,164.2,0.00,0.01,12345566,Trade
+AAPL        ,1.00,218.00,BUY,APPLE INC                      INTERNET ORDER                 UNSOLICITED                                                                                                                                               ,2018-11-01,2018-11-05,0.00,-218.00,0.00,0.00,37923121,Trade
+AAPL        ,0.00,,Dividend,APPLE INC                      CASH DIV  ON       2 SHS       REC 12/12/18 PAY 11/30/18      NON-RES TAX WITHHELD,2020-03-31,2020-04-15,0.00,1.8623,1.32,0.00,94832582,Financial
+            ,0.00,,Interest,INTEREST ON CREDIT BALANCE     AT  0.065  10/41 THRU 11/24,2018-11-16,2018-11-16,0.00,0.03,0.00,0.00,00099A109,Financial

@@ -29,7 +29,7 @@ public extension Currency {
   }
 }
 
-extension Currency: CustomStringConvertible {
+extension Currency: CustomStringConvertible, Equatable {
   public var description: String {
     unit.numberFormatter.string(for: amount) ?? ""
   }

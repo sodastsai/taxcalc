@@ -12,6 +12,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/sodastsai/hmrc-fx.git", from: "0.4.0"),
+    .package(url: "https://github.com/dehesa/CodableCSV.git", from: "0.6.0"),
   ],
   targets: [
     .target(name: "cgtcalc",
@@ -25,6 +26,19 @@ let package = Package(
     .testTarget(name: "DataFormatTests",
                 dependencies: [
                   .target(name: "DataFormat"),
+                ]),
+    .target(name: "FirstradeProvider",
+            dependencies: [
+              .target(name: "DataFormat"),
+              .product(name: "CodableCSV", package: "CodableCSV"),
+            ]),
+    .testTarget(name: "FirstradeProviderTests",
+                dependencies: [
+                  .target(name: "FirstradeProvider"),
+                  .target(name: "DataFormat"),
+                ],
+                resources: [
+                  .process("Resources"),
                 ]),
   ],
   swiftLanguageVersions: [.v5]
