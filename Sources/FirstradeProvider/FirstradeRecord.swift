@@ -84,39 +84,36 @@ extension FirstradeRecord: Decodable {
 
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let symbolString = try container.decode(String.self, forKey: .symbol)
-    let priceDecimal = try container.decode(Decimal.self, forKey: .price)
-    let interestDecimal = try container.decode(Decimal.self, forKey: .interest)
-    let amountDecimal = try container.decode(Decimal.self, forKey: .amount)
-    let commisionDecimal = try container.decode(Decimal.self, forKey: .commission)
-    let feeDecimal = try container.decode(Decimal.self, forKey: .fee)
-    let cusipString = try container.decode(String.self, forKey: .cusip)
-
-    symbol = symbolString.isEmpty ? nil : symbolString
+    symbol = try container.decode(String.self, forKey: .symbol, option: .emptyAsNil)
     quantity = try container.decode(Decimal.self, forKey: .quantity)
     action = try container.decode(Action.self, forKey: .action)
     description = try container.decode(String.self, forKey: .description)
     tradeDate = try container.decode(Date.self, forKey: .tradeDate)
     settledDate = try container.decode(Date.self, forKey: .settledDate)
-    cusip = cusipString.isEmpty ? nil : cusipString
+    cusip = try container.decode(String.self, forKey: .cusip, option: .emptyAsNil)
     recordType = try container.decode(RecordType.self, forKey: .recordType)
-
-    price = Currency(amount: priceDecimal, unit: .USD, time: tradeDate)
-    interest = Currency(amount: interestDecimal, unit: .USD, time: tradeDate)
-    amount = Currency(amount: amountDecimal, unit: .USD, time: tradeDate)
-    commission = Currency(amount: commisionDecimal, unit: .USD, time: tradeDate)
-    fee = Currency(amount: feeDecimal, unit: .USD, time: tradeDate)
+    price = try container.decode(Currency.self, forKey: .price, at: tradeDate)
+    interest = try container.decode(Currency.self, forKey: .interest, at: tradeDate)
+    amount = try container.decode(Currency.self, forKey: .amount, at: tradeDate)
+    commission = try container.decode(Currency.self, forKey: .commission, at: tradeDate)
+    fee = try container.decode(Currency.self, forKey: .fee, at: tradeDate)
   }
 }
 
-private let dateFormatter: DateFormatter = {
-  let formatter = DateFormatter()
-  formatter.dateFormat = "yyyy-MM-dd"
-  return formatter
-}()
+public extension FirstradeRecord {
+  static func from(contentsOf url: URL) throws -> [Self] {
+    let decoder = CSVDecoder {
+      $0.headerStrategy = .firstLine
+      $0.dateStrategy = .formatted(makeDateFormatter())
+      $0.decimalStrategy = .custom(parse(decimal:))
+      $0.trimStrategy = .whitespaces
+    }
+    return try decoder.decode([Self].self, from: url)
+  }
+}
 
-private func parseDecimal(_ decoder: Decoder) throws -> Decimal {
-  let string = try String(from: decoder).trimmingCharacters(in: .whitespacesAndNewlines)
+private func parse(decimal decoder: Decoder) throws -> Decimal {
+  let string = try String(from: decoder)
   guard !string.isEmpty else {
     return 0
   }
@@ -126,14 +123,30 @@ private func parseDecimal(_ decoder: Decoder) throws -> Decimal {
   return decimal
 }
 
-public extension FirstradeRecord {
-  static func from(contentsOf url: URL) throws -> [Self] {
-    let decoder = CSVDecoder {
-      $0.headerStrategy = .firstLine
-      $0.dateStrategy = .formatted(dateFormatter)
-      $0.decimalStrategy = .custom(parseDecimal)
-      $0.trimStrategy = .whitespaces
+private func makeDateFormatter() -> DateFormatter {
+  let formatter = DateFormatter()
+  formatter.dateFormat = "yyyy-MM-dd"
+  return formatter
+}
+
+private extension KeyedDecodingContainer {
+  enum StringDecodingOption {
+    case `default`
+    case emptyAsNil
+  }
+
+  func decode(_ type: String.Type, forKey key: Key, option: StringDecodingOption) throws -> String? {
+    let string = try decode(type, forKey: key)
+    switch option {
+    case .default:
+      return string
+    case .emptyAsNil:
+      return string.isEmpty ? nil : string
     }
-    return try decoder.decode([Self].self, from: url)
+  }
+
+  func decode(_: Currency.Type, forKey key: Key, at tradeDate: Date) throws -> Currency {
+    let decimal = try decode(Decimal.self, forKey: key)
+    return Currency(amount: decimal, unit: .USD, time: tradeDate)
   }
 }
