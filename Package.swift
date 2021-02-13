@@ -40,6 +40,11 @@ let package = Package(
                 resources: [
                   .process("Resources"),
                 ]),
+    .target(name: "SchwabProvider",
+            dependencies: [
+              .target(name: "DataFormat"),
+              .product(name: "CodableCSV", package: "CodableCSV"),
+            ]),
   ],
   swiftLanguageVersions: [.v5]
 )
