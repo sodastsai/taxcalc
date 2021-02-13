@@ -82,11 +82,11 @@ extension SchwabRecord: Decodable {
     action = try container.decode(Action.self, forKey: .action)
     symbol = try container.decodeIfPresent(String.self, forKey: .symbol)
     description = try container.decode(String.self, forKey: .description)
-    (tradeDate, settledDate) = try decodeDate(from: container)
+    (tradeDate, settledDate) = try container.decodeDates(forKey: .date)
     quantity = try container.decodeIfPresent(Decimal.self, forKey: .quantity)
-    price = try decodeCurrency(from: container, for: .price, at: tradeDate)
-    feesAndComm = try decodeCurrency(from: container, for: .feesAndComm, at: tradeDate)
-    amount = try decodeCurrency(from: container, for: .amount, at: tradeDate)
+    price = try container.decode(Currency.self, forKey: .price, at: tradeDate)
+    feesAndComm = try container.decode(Currency.self, forKey: .feesAndComm, at: tradeDate)
+    amount = try container.decode(Currency.self, forKey: .amount, at: tradeDate)
   }
 }
 
@@ -106,42 +106,42 @@ public extension SchwabRecord {
   }
 }
 
-private func decodeDate(from container: KeyedDecodingContainer<SchwabRecord.CodingKeys>) throws -> (Date, Date) {
-  let string = try container.decode(String.self, forKey: .date)
-  let pattern = try NSRegularExpression(pattern: #"(\d{2}/\d{2}/\d{4})"#)
-  let matches = pattern.matches(in: string, range: string.fullStringRange)
-  if matches.count == 1 {
-    guard
-      let dateString = string.matchedSubstring(of: matches[0]),
-      let date = dateFormatter.date(from: String(dateString))
-    else {
+private extension KeyedDecodingContainer {
+  func decodeDates(forKey key: Key) throws -> (Date, Date) {
+    let string = try decode(String.self, forKey: key)
+    let pattern = try NSRegularExpression(pattern: #"(\d{2}/\d{2}/\d{4})"#)
+    let matches = pattern.matches(in: string, range: string.fullStringRange)
+    if matches.count == 1 {
+      guard
+        let dateString = string.matchedSubstring(of: matches[0]),
+        let date = dateFormatter.date(from: String(dateString))
+      else {
+        throw SchwabRecord.DecodingError.invalidDateFormat
+      }
+      return (date, date)
+    } else if matches.count == 2 {
+      guard
+        let settledDateString = string.matchedSubstring(of: matches[0]),
+        let settledDate = dateFormatter.date(from: String(settledDateString)),
+        let tradeDateString = string.matchedSubstring(of: matches[1]),
+        let tradeDate = dateFormatter.date(from: String(tradeDateString))
+      else {
+        throw SchwabRecord.DecodingError.invalidDateFormat
+      }
+      return (tradeDate, settledDate)
+    } else {
       throw SchwabRecord.DecodingError.invalidDateFormat
     }
-    return (date, date)
-  } else if matches.count == 2 {
-    guard
-      let settledDateString = string.matchedSubstring(of: matches[0]),
-      let settledDate = dateFormatter.date(from: String(settledDateString)),
-      let tradeDateString = string.matchedSubstring(of: matches[1]),
-      let tradeDate = dateFormatter.date(from: String(tradeDateString))
-    else {
-      throw SchwabRecord.DecodingError.invalidDateFormat
-    }
-    return (tradeDate, settledDate)
-  } else {
-    throw SchwabRecord.DecodingError.invalidDateFormat
   }
-}
 
-private func decodeCurrency(
-  from container: KeyedDecodingContainer<SchwabRecord.CodingKeys>,
-  for key: SchwabRecord.CodingKeys,
-  at tradeDate: Date
-) throws -> Currency? {
-  guard let decimal = try container.decodeIfPresent(Decimal.self, forKey: key) else {
-    return nil
+  func decode(_: Currency.Type,
+              forKey key: Key,
+              at tradeDate: Date) throws -> Currency? {
+    guard let decimal = try decodeIfPresent(Decimal.self, forKey: key) else {
+      return nil
+    }
+    return Currency(amount: decimal, unit: .USD, time: tradeDate)
   }
-  return Currency(amount: decimal, unit: .USD, time: tradeDate)
 }
 
 private extension String {
