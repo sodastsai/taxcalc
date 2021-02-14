@@ -2,7 +2,7 @@ import CodableCSV
 import DataFormat
 import Foundation
 
-public struct SchwabRecord {
+public struct SchwabIndividualRecord {
   public enum Action: String, Decodable {
     case reinvestShares = "Reinvest Shares"
     case dividendReinvested = "Qual Div Reinvest"
@@ -57,9 +57,9 @@ public struct SchwabRecord {
   }
 }
 
-extension SchwabRecord: CustomStringConvertible, Equatable {}
+extension SchwabIndividualRecord: CustomStringConvertible, Equatable {}
 
-extension SchwabRecord: Decodable {
+extension SchwabIndividualRecord: Decodable {
   public enum DecodingError: Error {
     case invalidFileFormat
     case invalidDateFormat
@@ -90,7 +90,7 @@ extension SchwabRecord: Decodable {
   }
 }
 
-public extension SchwabRecord {
+public extension SchwabIndividualRecord {
   static func from(contentsOf url: URL) throws -> [Self] {
     let fileContent = try String(contentsOf: url, encoding: .utf8)
     // skipping first title line
@@ -116,7 +116,7 @@ private extension KeyedDecodingContainer {
         let dateString = string.matchedSubstring(of: matches[0]),
         let date = dateFormatter.date(from: String(dateString))
       else {
-        throw SchwabRecord.DecodingError.invalidDateFormat
+        throw SchwabIndividualRecord.DecodingError.invalidDateFormat
       }
       return (date, date)
     } else if matches.count == 2 {
@@ -126,11 +126,11 @@ private extension KeyedDecodingContainer {
         let tradeDateString = string.matchedSubstring(of: matches[1]),
         let tradeDate = dateFormatter.date(from: String(tradeDateString))
       else {
-        throw SchwabRecord.DecodingError.invalidDateFormat
+        throw SchwabIndividualRecord.DecodingError.invalidDateFormat
       }
       return (tradeDate, settledDate)
     } else {
-      throw SchwabRecord.DecodingError.invalidDateFormat
+      throw SchwabIndividualRecord.DecodingError.invalidDateFormat
     }
   }
 
@@ -161,7 +161,7 @@ private func parse(decimal decoder: Decoder) throws -> Decimal {
   let string = try String(from: decoder)
   let numberString = string.replacingOccurrences(of: "$", with: "")
   guard let decimal = Decimal(string: numberString) else {
-    throw SchwabRecord.DecodingError.nonDecimalString(numberString)
+    throw SchwabIndividualRecord.DecodingError.nonDecimalString(numberString)
   }
   return decimal
 }
