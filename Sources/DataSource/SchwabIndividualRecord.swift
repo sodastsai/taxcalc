@@ -3,7 +3,7 @@ import DataFormat
 import Foundation
 
 public struct SchwabIndividualRecord {
-  public enum Action: String, Decodable {
+  public enum Action: String {
     case reinvestShares = "Reinvest Shares"
     case dividendReinvested = "Qual Div Reinvest"
     case dividend = "Qualified Dividend"
@@ -59,13 +59,9 @@ public struct SchwabIndividualRecord {
 
 extension SchwabIndividualRecord: CustomStringConvertible, Equatable {}
 
-extension SchwabIndividualRecord: Decodable {
-  public enum DecodingError: Error {
-    case invalidFileFormat
-    case invalidDateFormat
-    case nonDecimalString(String)
-  }
+extension SchwabIndividualRecord.Action: Decodable {}
 
+extension SchwabIndividualRecord: Decodable {
   private enum CodingKey: String, Swift.CodingKey {
     case date = "Date"
     case action = "Action"
@@ -84,9 +80,9 @@ extension SchwabIndividualRecord: Decodable {
     description = try container.decode(String.self, forKey: .description)
     (tradeDate, settledDate) = try container.decodeDates(forKey: .date)
     quantity = try container.decodeIfPresent(Decimal.self, forKey: .quantity)
-    price = try container.decode(Currency.self, forKey: .price, at: tradeDate)
-    feesAndComm = try container.decode(Currency.self, forKey: .feesAndComm, at: tradeDate)
-    amount = try container.decode(Currency.self, forKey: .amount, at: tradeDate)
+    price = try container.decodeIfPresent(Currency.self, forKey: .price, at: tradeDate)
+    feesAndComm = try container.decodeIfPresent(Currency.self, forKey: .feesAndComm, at: tradeDate)
+    amount = try container.decodeIfPresent(Currency.self, forKey: .amount, at: tradeDate)
   }
 }
 
@@ -95,79 +91,47 @@ public extension SchwabIndividualRecord {
     let fileContent = try String(contentsOf: url, encoding: .utf8)
     // skipping first title line
     guard let csvString = fileContent.split(separator: "\r\n", maxSplits: 1).last else {
-      throw DecodingError.invalidFileFormat
+      throw DecodingError.invalidContent
     }
     let decoder = CSVDecoder {
       $0.headerStrategy = .firstLine
       $0.trimStrategy = .whitespaces
-      $0.decimalStrategy = .custom(parse(decimal:))
+      $0.decimalStrategy = .with(options: .replaceDollarSign)
     }
     return try decoder.decode([Self].self, from: String(csvString))
   }
 }
 
+// MARK: - Decoder
+
+// The "date" could be something like "MM/dd/yyyy as of MM/dd/yyyy"
 private extension KeyedDecodingContainer {
   func decodeDates(forKey key: Key) throws -> (Date, Date) {
     let string = try decode(String.self, forKey: key)
     let pattern = try NSRegularExpression(pattern: #"(\d{2}/\d{2}/\d{4})"#)
-    let matches = pattern.matches(in: string, range: string.fullStringRange)
+    let matches = pattern.matches(in: string, range: string.rangeOfFullString)
     if matches.count == 1 {
       guard
-        let dateString = string.matchedSubstring(of: matches[0]),
+        let dateString = string.substring(matching: matches[0]),
         let date = dateFormatter.date(from: String(dateString))
       else {
-        throw SchwabIndividualRecord.DecodingError.invalidDateFormat
+        throw DecodingError.invalidDateString(string)
       }
       return (date, date)
     } else if matches.count == 2 {
       guard
-        let settledDateString = string.matchedSubstring(of: matches[0]),
+        let settledDateString = string.substring(matching: matches[0]),
         let settledDate = dateFormatter.date(from: String(settledDateString)),
-        let tradeDateString = string.matchedSubstring(of: matches[1]),
+        let tradeDateString = string.substring(matching: matches[1]),
         let tradeDate = dateFormatter.date(from: String(tradeDateString))
       else {
-        throw SchwabIndividualRecord.DecodingError.invalidDateFormat
+        throw DecodingError.invalidDateString(string)
       }
       return (tradeDate, settledDate)
     } else {
-      throw SchwabIndividualRecord.DecodingError.invalidDateFormat
+      throw DecodingError.invalidDateString(string)
     }
-  }
-
-  func decode(_: Currency.Type,
-              forKey key: Key,
-              at tradeDate: Date) throws -> Currency? {
-    guard let decimal = try decodeIfPresent(Decimal.self, forKey: key) else {
-      return nil
-    }
-    return Currency(amount: decimal, unit: .USD, time: tradeDate)
   }
 }
 
-private extension String {
-  var fullStringRange: NSRange {
-    NSRange(startIndex ..< endIndex, in: self)
-  }
-
-  func matchedSubstring(of result: NSTextCheckingResult) -> Substring? {
-    guard let range = Range(result.range, in: self) else {
-      return nil
-    }
-    return self[range]
-  }
-}
-
-private func parse(decimal decoder: Decoder) throws -> Decimal {
-  let string = try String(from: decoder)
-  let numberString = string.replacingOccurrences(of: "$", with: "")
-  guard let decimal = Decimal(string: numberString) else {
-    throw SchwabIndividualRecord.DecodingError.nonDecimalString(numberString)
-  }
-  return decimal
-}
-
-private let dateFormatter: DateFormatter = {
-  let formatter = DateFormatter()
-  formatter.dateFormat = "MM/dd/yyyy"
-  return formatter
-}()
+private let dateFormatter = DateFormatter(dateFormat: "MM/dd/yyyy")

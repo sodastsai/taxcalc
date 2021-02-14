@@ -63,12 +63,6 @@ extension SchwabEACRecord: CustomStringConvertible, Equatable {}
 extension SchwabEACRecord.Action: Decodable {}
 
 extension SchwabEACRecord: Decodable {
-  public enum DecodingError: Error {
-    case invalidFileFormat
-    case invalidDateFormat(String)
-    case invalidDecimalFormat(String)
-  }
-
   private enum CodingKey: String, Swift.CodingKey {
     case date = "Date"
     case action = "Action"
@@ -113,25 +107,22 @@ public extension SchwabEACRecord {
     let csvContent = try normalizeCSVLines(fileContent)
     let decoder = CSVDecoder {
       $0.headerStrategy = .firstLine
-      $0.dateStrategy = .custom(parseDate(from:))
-      $0.decimalStrategy = .custom(parseDecimal(from:))
+      $0.dateStrategy = .by(formats: "yyyy/MM/dd", "MM/dd/yyyy")
+      $0.decimalStrategy = .with(options: [.emptyAsZero, .replaceDollarSign])
       $0.trimStrategy = .whitespaces
     }
     return try decoder.decode([Self].self, from: csvContent)
   }
 }
 
-private extension KeyedDecodingContainer {
-  func decode(_: Currency.Type, forKey key: Key, at date: Date) throws -> Currency {
-    let decimal = try decode(Decimal.self, forKey: key)
-    return Currency(amount: decimal, unit: .USD, time: date)
-  }
-}
+// MARK: - Normalize CSV
+
+// The CSV content is in an interlaced format. Hence we need to make it as a pure CSV table before parsing
 
 private func normalizeCSVLines(_ originalContent: String) throws -> String {
   let csvLines = originalContent.split(separator: "\r\n")
   guard csvLines.count > 4 else {
-    throw SchwabEACRecord.DecodingError.invalidFileFormat
+    throw DecodingError.invalidContent
   }
   let fullHeader = join(firstRow: 1, secondRow: 3, in: csvLines)
   var normalizedCSVLines = [String]()
@@ -148,12 +139,12 @@ private func normalizeCSVLines(_ originalContent: String) throws -> String {
       firstRowIndex < csvLines.count,
       secondRowIndex < csvLines.count
     else {
-      throw SchwabEACRecord.DecodingError.invalidFileFormat
+      throw DecodingError.invalidContent
     }
     normalizedCSVLines.append(join(firstRow: firstRowIndex, secondRow: secondRowIndex, in: csvLines))
   }
   guard consumedLines() == csvLines.count else {
-    throw SchwabEACRecord.DecodingError.invalidFileFormat
+    throw DecodingError.invalidContent
   }
   normalizedCSVLines.insert(fullHeader, at: 0)
   return normalizedCSVLines.joined(separator: "\n")
@@ -161,39 +152,4 @@ private func normalizeCSVLines(_ originalContent: String) throws -> String {
 
 private func join(firstRow: Int, secondRow: Int, in csvLines: [String.SubSequence]) -> String {
   "\(csvLines[firstRow])\(csvLines[secondRow].dropFirst(2))"
-}
-
-private let dateFormatters: [DateFormatter] = [
-  {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy/MM/dd"
-    return formatter
-  }(),
-  {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "MM/dd/yyyy"
-    return formatter
-  }(),
-]
-
-private func parseDate(from decoder: Decoder) throws -> Date {
-  let string = try String(from: decoder)
-  for dateFormatter in dateFormatters {
-    if let date = dateFormatter.date(from: string) {
-      return date
-    }
-  }
-  throw SchwabEACRecord.DecodingError.invalidDateFormat(string)
-}
-
-private func parseDecimal(from decoder: Decoder) throws -> Decimal {
-  let string = try String(from: decoder)
-  let decimalString = string.replacingOccurrences(of: "$", with: "")
-  if decimalString.isEmpty {
-    return 0
-  }
-  guard let decimal = Decimal(string: decimalString) else {
-    throw SchwabEACRecord.DecodingError.invalidDecimalFormat(string)
-  }
-  return decimal
 }

@@ -3,7 +3,7 @@ import DataFormat
 import Foundation
 
 public struct FirstradeRecord {
-  public enum Action: String, Decodable {
+  public enum Action: String {
     case buy = "BUY"
     case sell = "SELL"
     case dividend = "Dividend"
@@ -11,7 +11,7 @@ public struct FirstradeRecord {
     case other = "Other"
   }
 
-  public enum RecordType: String, Decodable {
+  public enum RecordType: String {
     case financial = "Financial"
     case trade = "Trade"
   }
@@ -61,11 +61,11 @@ public struct FirstradeRecord {
 
 extension FirstradeRecord: CustomStringConvertible, Equatable {}
 
-extension FirstradeRecord: Decodable {
-  public enum DecodingError: Error {
-    case noneDecimalString(String)
-  }
+extension FirstradeRecord.Action: Decodable {}
 
+extension FirstradeRecord.RecordType: Decodable {}
+
+extension FirstradeRecord: Decodable {
   private enum CodingKey: String, Swift.CodingKey {
     case symbol = "Symbol"
     case quantity = "Quantity"
@@ -104,49 +104,10 @@ public extension FirstradeRecord {
   static func from(contentsOf url: URL) throws -> [Self] {
     let decoder = CSVDecoder {
       $0.headerStrategy = .firstLine
-      $0.dateStrategy = .formatted(makeDateFormatter())
-      $0.decimalStrategy = .custom(parse(decimal:))
+      $0.dateStrategy = .by(formats: "yyyy-MM-dd")
+      $0.decimalStrategy = .with(options: .emptyAsZero)
       $0.trimStrategy = .whitespaces
     }
     return try decoder.decode([Self].self, from: url)
-  }
-}
-
-private func parse(decimal decoder: Decoder) throws -> Decimal {
-  let string = try String(from: decoder)
-  guard !string.isEmpty else {
-    return 0
-  }
-  guard let decimal = Decimal(string: string) else {
-    throw FirstradeRecord.DecodingError.noneDecimalString(string)
-  }
-  return decimal
-}
-
-private func makeDateFormatter() -> DateFormatter {
-  let formatter = DateFormatter()
-  formatter.dateFormat = "yyyy-MM-dd"
-  return formatter
-}
-
-private extension KeyedDecodingContainer {
-  enum StringDecodingOption {
-    case `default`
-    case emptyAsNil
-  }
-
-  func decode(_ type: String.Type, forKey key: Key, option: StringDecodingOption) throws -> String? {
-    let string = try decode(type, forKey: key)
-    switch option {
-    case .default:
-      return string
-    case .emptyAsNil:
-      return string.isEmpty ? nil : string
-    }
-  }
-
-  func decode(_: Currency.Type, forKey key: Key, at tradeDate: Date) throws -> Currency {
-    let decimal = try decode(Decimal.self, forKey: key)
-    return Currency(amount: decimal, unit: .USD, time: tradeDate)
   }
 }
