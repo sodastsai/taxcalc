@@ -66,7 +66,7 @@ extension FirstradeRecord: Decodable {
     case noneDecimalString(String)
   }
 
-  private enum CodingKeys: String, CodingKey {
+  private enum CodingKey: String, Swift.CodingKey {
     case symbol = "Symbol"
     case quantity = "Quantity"
     case price = "Price"
@@ -83,7 +83,7 @@ extension FirstradeRecord: Decodable {
   }
 
   public init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let container = try decoder.container(keyedBy: CodingKey.self)
     symbol = try container.decode(String.self, forKey: .symbol, option: .emptyAsNil)
     quantity = try container.decode(Decimal.self, forKey: .quantity)
     action = try container.decode(Action.self, forKey: .action)

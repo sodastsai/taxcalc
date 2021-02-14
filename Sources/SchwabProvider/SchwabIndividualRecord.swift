@@ -66,7 +66,7 @@ extension SchwabIndividualRecord: Decodable {
     case nonDecimalString(String)
   }
 
-  fileprivate enum CodingKeys: String, CodingKey {
+  private enum CodingKey: String, Swift.CodingKey {
     case date = "Date"
     case action = "Action"
     case symbol = "Symbol"
@@ -78,7 +78,7 @@ extension SchwabIndividualRecord: Decodable {
   }
 
   public init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let container = try decoder.container(keyedBy: CodingKey.self)
     action = try container.decode(Action.self, forKey: .action)
     symbol = try container.decodeIfPresent(String.self, forKey: .symbol)
     description = try container.decode(String.self, forKey: .description)
