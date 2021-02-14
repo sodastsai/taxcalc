@@ -1,5 +1,5 @@
 import DataFormat
-@testable import FirstradeProvider
+@testable import DataSource
 import Foundation
 
 import XCTest
@@ -19,7 +19,7 @@ func makeDecimal(_ string: String) -> Decimal {
   return decimal
 }
 
-class FirstradeProviderTests: XCTestCase {
+class FirstradeRecordTests: XCTestCase {
   // swiftlint:disable function_body_length
   func testReadingFromCSVFile() {
     guard

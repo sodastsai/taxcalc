@@ -27,24 +27,19 @@ let package = Package(
                 dependencies: [
                   .target(name: "DataFormat"),
                 ]),
-    .target(name: "FirstradeProvider",
+    .target(name: "DataSource",
             dependencies: [
               .target(name: "DataFormat"),
               .product(name: "CodableCSV", package: "CodableCSV"),
             ]),
-    .testTarget(name: "FirstradeProviderTests",
+    .testTarget(name: "DataSourceTests",
                 dependencies: [
-                  .target(name: "FirstradeProvider"),
                   .target(name: "DataFormat"),
+                  .target(name: "DataSource"),
                 ],
                 resources: [
                   .process("Resources"),
                 ]),
-    .target(name: "SchwabProvider",
-            dependencies: [
-              .target(name: "DataFormat"),
-              .product(name: "CodableCSV", package: "CodableCSV"),
-            ]),
   ],
   swiftLanguageVersions: [.v5]
 )
