@@ -100,14 +100,20 @@ extension FirstradeRecord: Decodable {
   }
 }
 
-public extension FirstradeRecord {
-  static func from(contentsOf url: URL) throws -> [Self] {
+extension FirstradeRecord: Record {}
+
+public struct FirstradeRecordProvider: RecordProvider {
+  public var filenamePattern: String {
+    #"Firstrade_\d{8}_\d{4}.csv"#
+  }
+
+  public func read(contentsOf url: URL) throws -> [Record] {
     let decoder = CSVDecoder {
       $0.headerStrategy = .firstLine
       $0.dateStrategy = .by(formats: "yyyy-MM-dd")
       $0.decimalStrategy = .with(options: .emptyAsZero)
       $0.trimStrategy = .whitespaces
     }
-    return try decoder.decode([Self].self, from: url)
+    return try decoder.decode([FirstradeRecord].self, from: url)
   }
 }

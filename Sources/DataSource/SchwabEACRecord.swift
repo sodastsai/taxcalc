@@ -101,8 +101,14 @@ extension SchwabEACRecord: Decodable {
   }
 }
 
-public extension SchwabEACRecord {
-  static func from(contentsOf url: URL) throws -> [Self] {
+extension SchwabEACRecord: Record {}
+
+public struct SchwabEACRecordProvider: RecordProvider {
+  public var filenamePattern: String {
+    #"Schwab_\d{8}_EAC_\d{4}.csv"#
+  }
+
+  public func read(contentsOf url: URL) throws -> [Record] {
     let fileContent = try String(contentsOf: url, encoding: .utf8)
     let csvContent = try normalizeCSVLines(fileContent)
     let decoder = CSVDecoder {
@@ -111,7 +117,7 @@ public extension SchwabEACRecord {
       $0.decimalStrategy = .with(options: [.emptyAsZero, .replaceDollarSign])
       $0.trimStrategy = .whitespaces
     }
-    return try decoder.decode([Self].self, from: csvContent)
+    return try decoder.decode([SchwabEACRecord].self, from: csvContent)
   }
 }
 

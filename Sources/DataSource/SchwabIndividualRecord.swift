@@ -86,8 +86,14 @@ extension SchwabIndividualRecord: Decodable {
   }
 }
 
-public extension SchwabIndividualRecord {
-  static func from(contentsOf url: URL) throws -> [Self] {
+extension SchwabIndividualRecord: Record {}
+
+public struct SchwabIndividualRecordProvider: RecordProvider {
+  public var filenamePattern: String {
+    #"Schwab_\d{8}_\d{4}.csv"#
+  }
+
+  public func read(contentsOf url: URL) throws -> [Record] {
     let fileContent = try String(contentsOf: url, encoding: .utf8)
     // skipping first title line
     guard let csvString = fileContent.split(separator: "\r\n", maxSplits: 1).last else {
@@ -98,7 +104,7 @@ public extension SchwabIndividualRecord {
       $0.trimStrategy = .whitespaces
       $0.decimalStrategy = .with(options: .replaceDollarSign)
     }
-    return try decoder.decode([Self].self, from: String(csvString))
+    return try decoder.decode([SchwabIndividualRecord].self, from: String(csvString))
   }
 }
 

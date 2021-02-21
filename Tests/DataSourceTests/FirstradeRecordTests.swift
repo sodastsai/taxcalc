@@ -24,7 +24,8 @@ class FirstradeRecordTests: XCTestCase {
   func testReadingFromCSVFile() {
     guard
       let csvURL = Bundle.module.url(forResource: "firstrade-example", withExtension: "csv"),
-      let records = try? FirstradeRecord.from(contentsOf: csvURL)
+      let rawRecords = try? FirstradeRecordProvider().read(contentsOf: csvURL),
+      let records = rawRecords as? [FirstradeRecord]
     else {
       XCTFail("Cannot load example CSV")
       return
