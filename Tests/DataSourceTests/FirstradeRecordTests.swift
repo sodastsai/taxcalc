@@ -5,7 +5,13 @@ import Foundation
 import XCTest
 
 func makeDate(day: Int, month: Int, year: Int) -> Date {
-  let dateComponents = DateComponents(calendar: .current, year: year, month: month, day: day)
+  let dateComponents = DateComponents(
+    calendar: .current,
+    timeZone: .init(secondsFromGMT: 0),
+    year: year,
+    month: month,
+    day: day
+  )
   guard let date = Calendar.current.date(from: dateComponents) else {
     fatalError()
   }
