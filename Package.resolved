@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "cgtcalc",
+        "repositoryURL": "https://github.com/sodastsai/cgtcalc.git",
+        "state": {
+          "branch": "master",
+          "revision": "ee897cbb070aea1592a0825b8a28e7535bc1fafd",
+          "version": null
+        }
+      },
+      {
         "package": "CodableCSV",
         "repositoryURL": "https://github.com/dehesa/CodableCSV.git",
         "state": {

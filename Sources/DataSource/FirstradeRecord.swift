@@ -1,3 +1,4 @@
+import CGTCalcCore
 import CodableCSV
 import DataFormat
 import Foundation
@@ -100,7 +101,10 @@ extension FirstradeRecord: Decodable {
   }
 }
 
-extension FirstradeRecord: Record {}
+extension FirstradeRecord: Record {
+  public var transaction: Transaction? { nil }
+  public var assetEvent: AssetEvent? { nil }
+}
 
 public struct FirstradeRecordProvider: RecordProvider {
   public var filenamePattern: String {

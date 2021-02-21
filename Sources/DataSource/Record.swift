@@ -1,6 +1,10 @@
+import CGTCalcCore
 import Foundation
 
-public protocol Record {}
+public protocol Record {
+  var transaction: Transaction? { get }
+  var assetEvent: AssetEvent? { get }
+}
 
 public protocol RecordProvider {
   var filenamePattern: String { get }

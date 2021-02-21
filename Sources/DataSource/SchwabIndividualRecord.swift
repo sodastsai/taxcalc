@@ -1,3 +1,4 @@
+import CGTCalcCore
 import CodableCSV
 import DataFormat
 import Foundation
@@ -86,7 +87,10 @@ extension SchwabIndividualRecord: Decodable {
   }
 }
 
-extension SchwabIndividualRecord: Record {}
+extension SchwabIndividualRecord: Record {
+  public var transaction: Transaction? { nil }
+  public var assetEvent: AssetEvent? { nil }
+}
 
 public struct SchwabIndividualRecordProvider: RecordProvider {
   public var filenamePattern: String {
