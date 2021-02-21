@@ -3,19 +3,19 @@
 import PackageDescription
 
 let package = Package(
-  name: "cgtcalc",
+  name: "taxcalc",
   platforms: [
     .macOS(.v11),
   ],
   products: [
-    .executable(name: "cgtcalc", targets: ["cgtcalc"]),
+    .executable(name: "taxcalc", targets: ["taxcalc"]),
   ],
   dependencies: [
     .package(url: "https://github.com/sodastsai/hmrc-fx.git", from: "0.4.0"),
     .package(url: "https://github.com/dehesa/CodableCSV.git", from: "0.6.0"),
   ],
   targets: [
-    .target(name: "cgtcalc",
+    .target(name: "taxcalc",
             dependencies: [
               .target(name: "DataFormat"),
             ]),
