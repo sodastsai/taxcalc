@@ -17,7 +17,7 @@ let package = Package(
   targets: [
     .target(name: "taxcalc",
             dependencies: [
-              .target(name: "DataFormat"),
+              .target(name: "DataSource"),
             ]),
     .target(name: "DataFormat",
             dependencies: [

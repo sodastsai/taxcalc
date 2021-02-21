@@ -1,22 +1,22 @@
-import DataFormat
+import DataSource
+import Foundation
 
-func case1() {
-  let priceInGBP = Currency(amount: 1, unit: .GBP)
-  if let priceInUSD = try? priceInGBP.converting(to: .USD) {
-    print("\(priceInGBP) == \(priceInUSD)")
-  } else {
-    print("case1 QQ")
+func main(arguments: [String]) throws -> Int32 {
+  guard arguments.count >= 2 else {
+    print("No container path")
+    return 1
   }
+  let container = URL(fileURLWithPath: arguments[1])
+  do {
+    let records = try RecorderLoader.default.load(from: container)
+    print(records.count)
+  }
+  return 0
 }
 
-func case2() {
-  let priceInUSD = Currency(amount: 2.70, unit: .USD)
-  if let priceInGBP = try? priceInUSD.converting(to: .GBP) {
-    print("\(priceInUSD) == \(priceInGBP)")
-  } else {
-    print("case2 QQ")
-  }
+do {
+  exit(try main(arguments: ProcessInfo.processInfo.arguments))
+} catch {
+  print(error)
+  exit(1024)
 }
-
-case1()
-case2()
