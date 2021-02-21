@@ -13,8 +13,11 @@ struct TaxCalculator: ParsableCommand {
       transactions: records.compactMap(\.transaction),
       assetEvents: records.compactMap(\.assetEvent)
     )
-    print(input.transactions.count)
-    print(input.assetEvents.count)
+    let calculator = try Calculator(input: input, logger: BasicLogger())
+    let result = try calculator.process()
+    let presenter = TextPresenter(result: result)
+    let output = try presenter.process()
+    print(output)
   }
 }
 
