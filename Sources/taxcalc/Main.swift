@@ -3,11 +3,11 @@ import CGTCalcCore
 import DataSource
 import Foundation
 
-struct TaxCalculator: ParsableCommand {
+struct TaxCalculator: AsyncParsableCommand {
   @Argument(help: "Directory of Stock & Shares records")
   var recordsContainer: URL
 
-  func run() throws {
+  func run() async throws {
     let records = try RecorderLoader.default.load(from: recordsContainer)
     let input = CalculatorInput(
       transactions: records.compactMap(\.transaction),
@@ -21,4 +21,9 @@ struct TaxCalculator: ParsableCommand {
   }
 }
 
-TaxCalculator.main()
+@main
+enum App {
+  static func main() async throws {
+    try await TaxCalculator.main()
+  }
+}
