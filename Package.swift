@@ -11,7 +11,7 @@ let package = Package(
     .executable(name: "taxcalc", targets: ["taxcalc"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/sodastsai/hmrc-fx.git", .upToNextMinor(from: "0.4.0")),
+    .package(url: "https://github.com/sodastsai/hmrc-fx.git", from: "0.5.0"),
     .package(url: "https://github.com/dehesa/CodableCSV.git", from: "0.6.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
     .package(url: "https://github.com/sodastsai/cgtcalc.git", .branch("main")),

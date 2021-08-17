@@ -7,8 +7,8 @@ public extension Currency {
     case failedToQuery(Unit)
   }
 
-  func converting(to anotherUnit: Unit, via source: RateSource = .directHMRC) throws -> Currency {
-    let conversion = try getConversion(from: unit, to: anotherUnit, via: source)
+  func converting(to anotherUnit: Unit, via source: RateSource = .directHMRC) async throws -> Currency {
+    let conversion = try await getConversion(from: unit, to: anotherUnit, via: source)
     return Currency(amount: conversion(amount), unit: anotherUnit, time: time)
   }
 }
@@ -17,13 +17,14 @@ extension Currency {
   typealias AmountConverter = (Decimal) -> Decimal
 
   func getConversion(from currentUnit: Unit, to anotherUnit: Unit,
-                     via source: RateSource) throws -> AmountConverter {
+                     via source: RateSource) async throws -> AmountConverter {
     guard currentUnit != anotherUnit else {
       return { $0 }
     }
     switch (currentUnit, anotherUnit) {
     case let (.GBP, queryingUnit), let (queryingUnit, .GBP):
-      guard let rate = source.rate(of: queryingUnit.rawValue, at: time)?.first?.rate else {
+      let rates = try await source.rate(of: queryingUnit.rawValue, at: time)
+      guard let rate = rates.first?.rate else {
         throw ConversionError.failedToQuery(queryingUnit)
       }
       if currentUnit == .GBP {

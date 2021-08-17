@@ -7,8 +7,11 @@ import XCTest
 class TestRateFetcher: RateFetcher {
   var rates = [Month: [Rate.CurrencyCode: [Rate]]]()
 
-  func fetchRate(of month: Month) -> [Rate.CurrencyCode: [Rate]]? {
-    rates[month]
+  func fetchRate(of month: Month) async throws -> [Rate.CurrencyCode: [Rate]] {
+    guard let rate = rates[month] else {
+      throw RateFetcherError.fetchingError
+    }
+    return rate
   }
 }
 
@@ -44,67 +47,75 @@ class CurrencyConversionTests: XCTestCase {
     super.tearDown()
   }
 
-  func testConvertingToSameCurrencyType() {
+  func testConvertingToSameCurrencyType() async throws {
     let originalCurrency = Currency(amount: 1.2, unit: .USD, time: makeDate(month: 10, year: 2019))
-    guard let convertedCurrency = try? originalCurrency.converting(to: .USD, via: rateSource) else {
-      XCTFail("Failed to convert currency from GBP to GBP")
-      return
-    }
+    let convertedCurrency = try await originalCurrency.converting(to: .USD, via: rateSource)
     XCTAssertEqual(convertedCurrency.amount, 1.2)
     XCTAssertEqual(convertedCurrency.unit, .USD)
     XCTAssertEqual(convertedCurrency.time, originalCurrency.time)
   }
 
-  func testConvertingToACurrencyThatRateSourceNotSupporting() {
+  func testConvertingToACurrencyThatRateSourceNotSupporting() async {
     let originalCurrency = Currency(amount: 1.2, unit: .GBP, time: makeDate(month: 10, year: 2019))
-    XCTAssertThrowsError(try originalCurrency.converting(to: .USD, via: rateSource)) { error in
-      guard case let Currency.ConversionError.failedToQuery(unit) = error else {
-        XCTFail("Raised wrong error: \(error)")
-        return
-      }
-      XCTAssertEqual(unit, .USD)
+    do {
+      let _ = try await originalCurrency.converting(to: .USD, via: rateSource)
+      XCTFail("Error not throw")
+    } catch RateFetcherError.fetchingError {
+      // pass
+    } catch {
+      XCTFail("Raised wrong error: \(error)")
     }
   }
 
-  func testConvertingBetweenTwoNonGBPCurrencies() {
+  func testConvertingToACurrencyThatRateSourceIsEmpty() async {
+    let originalCurrency = Currency(amount: 1.2, unit: .GBP, time: makeDate(month: 10, year: 2019))
+    rateFetcher.rates[Month(.oct, in: 2019)] = [
+      "USD": [],
+    ]
+    do {
+      let _ = try await originalCurrency.converting(to: .USD, via: rateSource)
+      XCTFail("Error not throw")
+    } catch let Currency.ConversionError.failedToQuery(unit) {
+      XCTAssertEqual(unit, .USD)
+    } catch {
+      XCTFail("Raised wrong error: \(error)")
+    }
+  }
+
+  func testConvertingBetweenTwoNonGBPCurrencies() async {
     let originalCurrency = Currency(amount: 1.2, unit: .TWD, time: makeDate(month: 10, year: 2019))
-    XCTAssertThrowsError(try originalCurrency.converting(to: .USD, via: rateSource)) { error in
-      guard case let Currency.ConversionError.unsupportedConversion(unit1, unit2) = error else {
-        XCTFail("Raised wrong error: \(error)")
-        return
-      }
+    do {
+      let _ = try await originalCurrency.converting(to: .USD, via: rateSource)
+      XCTFail("Error not throw")
+    } catch let Currency.ConversionError.unsupportedConversion(unit1, unit2) {
       XCTAssertEqual(unit1, .TWD)
       XCTAssertEqual(unit2, .USD)
+    } catch {
+      XCTFail("Raised wrong error: \(error)")
     }
   }
 
-  func testConvertingFromGBPToOtherCurrency() {
+  func testConvertingFromGBPToOtherCurrency() async throws {
     rateFetcher.rates[Month(.oct, in: 2019)] = [
       "USD": [
         makeRate("1.3", currencyCode: "USD"),
       ],
     ]
     let originalCurrency = Currency(amount: makeDecimal("1.2"), unit: .GBP, time: makeDate(month: 10, year: 2019))
-    guard let usdCurrency = try? originalCurrency.converting(to: .USD, via: rateSource) else {
-      XCTFail("Failed to convert currency")
-      return
-    }
+    let usdCurrency = try await originalCurrency.converting(to: .USD, via: rateSource)
     XCTAssertEqual(usdCurrency.amount, makeDecimal("1.56"))
     XCTAssertEqual(usdCurrency.unit, .USD)
     XCTAssertEqual(usdCurrency.time, originalCurrency.time)
   }
 
-  func testConvertingFromOtherCurrencyToGBP() {
+  func testConvertingFromOtherCurrencyToGBP() async throws {
     rateFetcher.rates[Month(.oct, in: 2020)] = [
       "TWD": [
         makeRate("38.20", currencyCode: "UWD"),
       ],
     ]
     let originalCurrency = Currency(amount: makeDecimal("76.40"), unit: .TWD, time: makeDate(month: 10, year: 2020))
-    guard let gbpCurrency = try? originalCurrency.converting(to: .GBP, via: rateSource) else {
-      XCTFail("Failed to convert currency")
-      return
-    }
+    let gbpCurrency = try await originalCurrency.converting(to: .GBP, via: rateSource)
     XCTAssertEqual(gbpCurrency.amount, makeDecimal("2"))
     XCTAssertEqual(gbpCurrency.unit, .GBP)
     XCTAssertEqual(gbpCurrency.time, originalCurrency.time)
