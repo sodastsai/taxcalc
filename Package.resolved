@@ -5,8 +5,8 @@
         "package": "cgtcalc",
         "repositoryURL": "https://github.com/sodastsai/cgtcalc.git",
         "state": {
-          "branch": "master",
-          "revision": "ee897cbb070aea1592a0825b8a28e7535bc1fafd",
+          "branch": "main",
+          "revision": "2ebd1691efc3adebc85bf015628741d69ee687bc",
           "version": null
         }
       },
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/dehesa/CodableCSV.git",
         "state": {
           "branch": null,
-          "revision": "7223016cee159d3a1f323c23ba19d9703cf3ce13",
-          "version": "0.6.5"
+          "revision": "82ee81e7cdb0700f1d6574dbec314872dce5003e",
+          "version": "0.6.6"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "9564d61b08a5335ae0a36f789a7d71493eacadfc",
-          "version": "0.3.2"
+          "revision": "83b23d940471b313427da226196661856f6ba3e0",
+          "version": "0.4.4"
         }
       },
       {

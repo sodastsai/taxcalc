@@ -1,28 +1,28 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
 
 import PackageDescription
 
 let package = Package(
   name: "taxcalc",
   platforms: [
-    .macOS(.v11),
+    .macOS(.v12),
   ],
   products: [
     .executable(name: "taxcalc", targets: ["taxcalc"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/sodastsai/hmrc-fx.git", from: "0.4.0"),
+    .package(url: "https://github.com/sodastsai/hmrc-fx.git", .upToNextMinor(from: "0.4.0")),
     .package(url: "https://github.com/dehesa/CodableCSV.git", from: "0.6.0"),
-    .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.3.0")),
-    .package(url: "https://github.com/sodastsai/cgtcalc.git", .branch("master")),
+    .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
+    .package(url: "https://github.com/sodastsai/cgtcalc.git", .branch("main")),
   ],
   targets: [
-    .target(name: "taxcalc",
-            dependencies: [
-              .target(name: "DataSource"),
-              .product(name: "ArgumentParser", package: "swift-argument-parser"),
-              .product(name: "CGTCalcCore", package: "cgtcalc"),
-            ]),
+    .executableTarget(name: "taxcalc",
+                      dependencies: [
+                        .target(name: "DataSource"),
+                        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                        .product(name: "CGTCalcCore", package: "cgtcalc"),
+                      ]),
     .target(name: "DataFormat",
             dependencies: [
               .product(name: "HMRCExchangeRate", package: "hmrc-fx"),
