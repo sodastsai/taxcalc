@@ -58,7 +58,7 @@ class CurrencyConversionTests: XCTestCase {
   func testConvertingToACurrencyThatRateSourceNotSupporting() async {
     let originalCurrency = Currency(amount: 1.2, unit: .GBP, time: makeDate(month: 10, year: 2019))
     do {
-      let _ = try await originalCurrency.converting(to: .USD, via: rateSource)
+      _ = try await originalCurrency.converting(to: .USD, via: rateSource)
       XCTFail("Error not throw")
     } catch RateFetcherError.fetchingError {
       // pass
@@ -73,7 +73,7 @@ class CurrencyConversionTests: XCTestCase {
       "USD": [],
     ]
     do {
-      let _ = try await originalCurrency.converting(to: .USD, via: rateSource)
+      _ = try await originalCurrency.converting(to: .USD, via: rateSource)
       XCTFail("Error not throw")
     } catch let Currency.ConversionError.failedToQuery(unit) {
       XCTAssertEqual(unit, .USD)
@@ -85,7 +85,7 @@ class CurrencyConversionTests: XCTestCase {
   func testConvertingBetweenTwoNonGBPCurrencies() async {
     let originalCurrency = Currency(amount: 1.2, unit: .TWD, time: makeDate(month: 10, year: 2019))
     do {
-      let _ = try await originalCurrency.converting(to: .USD, via: rateSource)
+      _ = try await originalCurrency.converting(to: .USD, via: rateSource)
       XCTFail("Error not throw")
     } catch let Currency.ConversionError.unsupportedConversion(unit1, unit2) {
       XCTAssertEqual(unit1, .TWD)
