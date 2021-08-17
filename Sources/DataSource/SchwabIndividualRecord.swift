@@ -99,10 +99,7 @@ public struct SchwabIndividualRecordProvider: RecordProvider {
 
   public func read(contentsOf url: URL) throws -> [Record] {
     let fileContent = try String(contentsOf: url, encoding: .utf8)
-    // skipping first title line
-    guard let csvString = fileContent.split(separator: "\r\n", maxSplits: 1).last else {
-      throw DecodingError.invalidContent
-    }
+    let csvString = normalizeCSVLines(fileContent)
     let decoder = CSVDecoder {
       $0.headerStrategy = .firstLine
       $0.trimStrategy = .whitespaces
@@ -145,3 +142,9 @@ private extension KeyedDecodingContainer {
 }
 
 private let dateFormatter = DateFormatter(dateFormat: "MM/dd/yyyy")
+
+private func normalizeCSVLines(_ originalContent: String) -> String {
+  // Strip the first title line and the last summary line
+  let lines = originalContent.split(separator: "\r\n")
+  return lines[1..<lines.count-1].joined(separator: "\r\n")
+}
