@@ -146,5 +146,5 @@ private let dateFormatter = DateFormatter(dateFormat: "MM/dd/yyyy")
 private func normalizeCSVLines(_ originalContent: String) -> String {
   // Strip the first title line and the last summary line
   let lines = originalContent.split(separator: "\r\n")
-  return lines[1..<lines.count-1].joined(separator: "\r\n")
+  return lines[1 ..< lines.count - 1].joined(separator: "\r\n")
 }
