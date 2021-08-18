@@ -90,7 +90,32 @@ extension SchwabIndividualRecord: Decodable {
 }
 
 extension SchwabIndividualRecord: Record {
-  public var type: RecordType? { nil }
+  private var transactionKind: Transaction.Kind? {
+    switch action {
+    case .buy:
+      return .Buy
+    case .sell:
+      return .Sell
+    default:
+      return nil
+    }
+  }
+
+  public var type: RecordType? {
+    get async throws {
+      if let transactionKind = transactionKind, let symbol = symbol {
+        return .transaction(Transaction(
+          kind: transactionKind,
+          date: tradeDate,
+          asset: symbol,
+          amount: quantity ?? 0,
+          price: try await price?.converting(to: .GBP).amount ?? 0,
+          expenses: try await feesAndComm?.converting(to: .GBP).amount ?? 0
+        ))
+      }
+      return nil
+    }
+  }
 }
 
 public struct SchwabIndividualRecordProvider: RecordProvider {
