@@ -105,7 +105,18 @@ extension SchwabEACRecord: Decodable {
 }
 
 extension SchwabEACRecord: Record {
-  public var type: RecordType? { nil }
+  public var type: RecordType? {
+    get async throws {
+      .transaction(Transaction(
+        kind: .Buy,
+        date: date,
+        asset: symbol,
+        amount: Decimal(quantity),
+        price: try await fairMarketValue.converting(to: .GBP).amount,
+        expenses: try await feesAndCommissions.converting(to: .GBP).amount
+      ))
+    }
+  }
 }
 
 public struct SchwabEACRecordProvider: RecordProvider {
