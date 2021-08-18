@@ -128,7 +128,7 @@ extension FirstradeRecord: Record {
           asset: symbol,
           amount: abs(quantity),
           price: try await price.converting(to: .GBP).amount,
-          expenses: 0
+          expenses: try await fee.converting(to: .GBP).amount
         ))
       }
       return nil
