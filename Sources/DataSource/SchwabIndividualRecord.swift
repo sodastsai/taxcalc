@@ -90,6 +90,10 @@ extension SchwabIndividualRecord: Decodable {
 }
 
 extension SchwabIndividualRecord: Record {
+  public var date: Date {
+    tradeDate
+  }
+  
   private var transactionKind: Transaction.Kind? {
     switch action {
     case .buy:

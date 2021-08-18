@@ -24,7 +24,7 @@ public struct RecorderLoader {
         return nil
       }
       return try provider.read(contentsOf: fileURL)
-    }.reduce([], +)
+    }.reduce([], +).sorted(by: \.date)
   }
 }
 

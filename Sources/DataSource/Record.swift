@@ -1,6 +1,7 @@
 //
 
 import CGTCalcCore
+import Foundation
 
 public enum RecordType {
   case transaction(Transaction)
@@ -8,6 +9,7 @@ public enum RecordType {
 }
 
 public protocol Record {
+  var date: Date { get }
   var type: RecordType? { get async throws }
 }
 
