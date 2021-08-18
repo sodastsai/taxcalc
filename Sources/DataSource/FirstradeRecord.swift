@@ -104,7 +104,32 @@ extension FirstradeRecord: Decodable {
 }
 
 extension FirstradeRecord: Record {
-  public var type: DataSource.RecordType? { nil }
+  private var transactionKind: Transaction.Kind? {
+    switch action {
+    case .buy:
+      return .Buy
+    case .sell:
+      return .Sell
+    case .dividend, .interest, .other:
+      return nil
+    }
+  }
+
+  public var type: DataSource.RecordType? {
+    get async throws {
+      if let transactionKind = transactionKind, let symbol = symbol {
+        return .transaction(Transaction(
+          kind: transactionKind,
+          date: tradeDate,
+          asset: symbol,
+          amount: abs(quantity),
+          price: try await price.converting(to: .GBP).amount,
+          expenses: 0
+        ))
+      }
+      return nil
+    }
+  }
 }
 
 public struct FirstradeRecordProvider: RecordProvider {
