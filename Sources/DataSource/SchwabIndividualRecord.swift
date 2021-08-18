@@ -90,8 +90,7 @@ extension SchwabIndividualRecord: Decodable {
 }
 
 extension SchwabIndividualRecord: Record {
-  public var transaction: Transaction? { nil }
-  public var assetEvent: AssetEvent? { nil }
+  public var type: RecordType? { nil }
 }
 
 public struct SchwabIndividualRecordProvider: RecordProvider {

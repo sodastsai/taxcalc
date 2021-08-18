@@ -105,8 +105,7 @@ extension SchwabEACRecord: Decodable {
 }
 
 extension SchwabEACRecord: Record {
-  public var transaction: Transaction? { nil }
-  public var assetEvent: AssetEvent? { nil }
+  public var type: RecordType? { nil }
 }
 
 public struct SchwabEACRecordProvider: RecordProvider {

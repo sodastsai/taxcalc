@@ -11,10 +11,8 @@ struct TaxCalculator: AsyncParsableCommand {
 
   func run() async throws {
     let records = try RecorderLoader.default.load(from: recordsContainer)
-    let input = CalculatorInput(
-      transactions: records.compactMap(\.transaction),
-      assetEvents: records.compactMap(\.assetEvent)
-    )
+    let (transactions, assetEvents) = try await records.groupedByRecordType()
+    let input = CalculatorInput(transactions: transactions, assetEvents: assetEvents)
     let calculator = try Calculator(input: input, logger: BasicLogger())
     let result = try calculator.process()
     let presenter = TextPresenter(result: result)

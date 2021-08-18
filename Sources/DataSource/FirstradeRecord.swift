@@ -104,8 +104,7 @@ extension FirstradeRecord: Decodable {
 }
 
 extension FirstradeRecord: Record {
-  public var transaction: Transaction? { nil }
-  public var assetEvent: AssetEvent? { nil }
+  public var type: DataSource.RecordType? { nil }
 }
 
 public struct FirstradeRecordProvider: RecordProvider {
