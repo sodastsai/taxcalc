@@ -1,6 +1,7 @@
 //
 
 import Foundation
+import Regex
 
 public struct RecorderLoader {
   let providers: [RecordProvider]
@@ -9,18 +10,17 @@ public struct RecorderLoader {
     self.providers = providers
   }
 
-  func provider(of fileURL: URL) -> RecordProvider? {
+  func provider(of fileURL: URL) throws -> RecordProvider? {
     let filename = fileURL.lastPathComponent
-    let fullFilenameRange = filename.startIndex ..< filename.endIndex
-    return providers.first {
-      filename.range(of: $0.filenamePattern, options: .regularExpression) == fullFilenameRange
+    return try providers.first {
+      try Regex($0.filenamePattern).isMatched(by: filename)
     }
   }
 
   public func load(from container: URL) throws -> [Record] {
     let fileURLs = try FileManager.default.contentsOfDirectory(at: container, includingPropertiesForKeys: [])
     return try fileURLs.compactMap { fileURL in
-      guard let provider = provider(of: fileURL) else {
+      guard let provider = try provider(of: fileURL) else {
         return nil
       }
       return try provider.read(contentsOf: fileURL)
