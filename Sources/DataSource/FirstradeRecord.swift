@@ -87,19 +87,20 @@ extension FirstradeRecord: Decodable {
 
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKey.self)
-    symbol = try container.decode(String.self, forKey: .symbol, option: .emptyAsNil)
-    quantity = try container.decode(Decimal.self, forKey: .quantity)
-    action = try container.decode(Action.self, forKey: .action)
-    description = try container.decode(String.self, forKey: .description)
-    tradeDate = try container.decode(Date.self, forKey: .tradeDate)
-    settledDate = try container.decode(Date.self, forKey: .settledDate)
-    cusip = try container.decode(String.self, forKey: .cusip, option: .emptyAsNil)
-    recordType = try container.decode(RecordType.self, forKey: .recordType)
-    price = try container.decode(Currency.self, forKey: .price, at: tradeDate)
-    interest = try container.decode(Currency.self, forKey: .interest, at: tradeDate)
-    amount = try container.decode(Currency.self, forKey: .amount, at: tradeDate)
-    commission = try container.decode(Currency.self, forKey: .commission, at: tradeDate)
-    fee = try container.decode(Currency.self, forKey: .fee, at: tradeDate)
+    let tradeDate = try container.decode(Date.self, forKey: .tradeDate)
+    self = .init(symbol: try container.decode(String.self, forKey: .symbol, option: .emptyAsNil),
+                 quantity: try container.decode(Decimal.self, forKey: .quantity),
+                 price: try container.decode(Currency.self, forKey: .price, at: tradeDate),
+                 action: try container.decode(Action.self, forKey: .action),
+                 description: try container.decode(String.self, forKey: .description),
+                 tradeDate: tradeDate,
+                 settledDate: try container.decode(Date.self, forKey: .settledDate),
+                 interest: try container.decode(Currency.self, forKey: .interest, at: tradeDate),
+                 amount: try container.decode(Currency.self, forKey: .amount, at: tradeDate),
+                 commission: try container.decode(Currency.self, forKey: .commission, at: tradeDate),
+                 fee: try container.decode(Currency.self, forKey: .fee, at: tradeDate),
+                 cusip: try container.decode(String.self, forKey: .cusip, option: .emptyAsNil),
+                 recordType: try container.decode(RecordType.self, forKey: .recordType))
   }
 }
 

@@ -86,21 +86,24 @@ extension SchwabEACRecord: Decodable {
 
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKey.self)
-    date = try container.decode(Date.self, forKey: .date)
-    action = try container.decode(Action.self, forKey: .action)
-    symbol = try container.decode(String.self, forKey: .symbol)
-    description = try container.decode(String.self, forKey: .description)
-    quantity = try container.decode(Int.self, forKey: .quantity)
-    feesAndCommissions = try container.decode(Currency.self, forKey: .feesAndCommissions, at: date)
-    disbursementElection = try container.decode(Currency.self, forKey: .disbursementElection, at: date)
-    amount = try container.decode(Currency.self, forKey: .amount, at: date)
-    awardDate = try container.decode(Date.self, forKey: .awardDate)
-    awardId = try container.decode(String.self, forKey: .awardId)
-    fairMarketValue = try container.decode(Currency.self, forKey: .fairMarketValue, at: date)
-    salePrice = try container.decode(Currency.self, forKey: .salePrice, at: date)
-    sharesSoldOrWithheldForTaxes = try container.decode(Int.self, forKey: .sharesSoldOrWithheldForTaxes)
-    netSharesDeposited = try container.decode(Int.self, forKey: .netSharesDeposited)
-    totalTaxes = try container.decode(Currency.self, forKey: .totalTaxes, at: date)
+    let date = try container.decode(Date.self, forKey: .date)
+    self = .init(
+      date: date,
+      action: try container.decode(Action.self, forKey: .action),
+      symbol: try container.decode(String.self, forKey: .symbol),
+      description: try container.decode(String.self, forKey: .description),
+      quantity: try container.decode(Int.self, forKey: .quantity),
+      feesAndCommissions: try container.decode(Currency.self, forKey: .feesAndCommissions, at: date),
+      disbursementElection: try container.decode(Currency.self, forKey: .disbursementElection, at: date),
+      amount: try container.decode(Currency.self, forKey: .amount, at: date),
+      awardDate: try container.decode(Date.self, forKey: .awardDate),
+      awardId: try container.decode(String.self, forKey: .awardId),
+      fairMarketValue: try container.decode(Currency.self, forKey: .fairMarketValue, at: date),
+      salePrice: try container.decode(Currency.self, forKey: .salePrice, at: date),
+      sharesSoldOrWithheldForTaxes: try container.decode(Int.self, forKey: .sharesSoldOrWithheldForTaxes),
+      netSharesDeposited: try container.decode(Int.self, forKey: .netSharesDeposited),
+      totalTaxes: try container.decode(Currency.self, forKey: .totalTaxes, at: date)
+    )
   }
 }
 

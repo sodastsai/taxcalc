@@ -78,14 +78,18 @@ extension SchwabIndividualRecord: Decodable {
 
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKey.self)
-    action = try container.decode(Action.self, forKey: .action)
-    symbol = try container.decodeIfPresent(String.self, forKey: .symbol)
-    description = try container.decode(String.self, forKey: .description)
-    (tradeDate, settledDate) = try container.decodeDates(forKey: .date)
-    quantity = try container.decodeIfPresent(Decimal.self, forKey: .quantity)
-    price = try container.decodeIfPresent(Currency.self, forKey: .price, at: tradeDate)
-    feesAndComm = try container.decodeIfPresent(Currency.self, forKey: .feesAndComm, at: tradeDate)
-    amount = try container.decodeIfPresent(Currency.self, forKey: .amount, at: tradeDate)
+    let (tradeDate, settledDate) = try container.decodeDates(forKey: .date)
+    self = .init(
+      action: try container.decode(Action.self, forKey: .action),
+      symbol: try container.decodeIfPresent(String.self, forKey: .symbol),
+      description: try container.decode(String.self, forKey: .description),
+      tradeDate: tradeDate,
+      settledDate: settledDate,
+      quantity: try container.decodeIfPresent(Decimal.self, forKey: .quantity),
+      price: try container.decodeIfPresent(Currency.self, forKey: .price, at: tradeDate),
+      feesAndComm: try container.decodeIfPresent(Currency.self, forKey: .feesAndComm, at: tradeDate),
+      amount: try container.decodeIfPresent(Currency.self, forKey: .amount, at: tradeDate)
+    )
   }
 }
 
@@ -93,7 +97,7 @@ extension SchwabIndividualRecord: Record {
   public var date: Date {
     tradeDate
   }
-  
+
   private var transactionKind: Transaction.Kind? {
     switch action {
     case .buy:

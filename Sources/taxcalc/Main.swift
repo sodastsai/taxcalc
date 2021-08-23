@@ -20,7 +20,7 @@ struct TaxCalculator: AsyncParsableCommand {
     let result = try calculator.process()
     let presenter = TextPresenter(result: result)
     let output = try presenter.process()
-    
+
     print(output)
   }
 }
