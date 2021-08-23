@@ -15,6 +15,7 @@ let package = Package(
     .package(url: "https://github.com/dehesa/CodableCSV.git", from: "0.6.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
     .package(url: "https://github.com/sodastsai/cgtcalc.git", .branch("main")),
+    .package(url: "https://github.com/sindresorhus/Regex.git", from: "0.1.1"),
   ],
   targets: [
     .executableTarget(name: "taxcalc",
@@ -36,6 +37,7 @@ let package = Package(
               .target(name: "DataFormat"),
               .product(name: "CodableCSV", package: "CodableCSV"),
               .product(name: "CGTCalcCore", package: "cgtcalc"),
+              .product(name: "Regex", package: "Regex"),
             ]),
     .testTarget(name: "DataSourceTests",
                 dependencies: [

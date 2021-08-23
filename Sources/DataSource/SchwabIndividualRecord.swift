@@ -100,7 +100,7 @@ extension SchwabIndividualRecord: Record {
 
   private var transactionKind: Transaction.Kind? {
     switch action {
-    case .buy:
+    case .buy, .reinvestShares:
       return .Buy
     case .sell:
       return .Sell
@@ -111,7 +111,8 @@ extension SchwabIndividualRecord: Record {
 
   public var type: RecordType? {
     get async throws {
-      if let transactionKind = transactionKind, let symbol = symbol, let price = price {
+      guard let symbol = symbol else { return nil }
+      if let transactionKind = transactionKind, let price = price {
         return .transaction(Transaction(
           kind: transactionKind,
           date: tradeDate,

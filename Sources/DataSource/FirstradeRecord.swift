@@ -4,6 +4,7 @@ import CGTCalcCore
 import CodableCSV
 import DataFormat
 import Foundation
+import Regex
 
 public struct FirstradeRecord {
   public enum Action: String {
@@ -87,12 +88,23 @@ extension FirstradeRecord: Decodable {
 
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKey.self)
+
     let tradeDate = try container.decode(Date.self, forKey: .tradeDate)
+    let description = try container.decode(String.self, forKey: .description)
+    var action = try container.decode(Action.self, forKey: .action)
+    let price: Currency
+    if action == .other, let dividendReinvestPrice = extractDividendReinvestPrice(from: description) {
+      action = .buy
+      price = Currency(amount: dividendReinvestPrice, unit: .USD, time: tradeDate)
+    } else {
+      price = try container.decode(Currency.self, forKey: .price, at: tradeDate)
+    }
+
     self = .init(symbol: try container.decode(String.self, forKey: .symbol, option: .emptyAsNil),
                  quantity: try container.decode(Decimal.self, forKey: .quantity),
-                 price: try container.decode(Currency.self, forKey: .price, at: tradeDate),
-                 action: try container.decode(Action.self, forKey: .action),
-                 description: try container.decode(String.self, forKey: .description),
+                 price: price,
+                 action: action,
+                 description: description,
                  tradeDate: tradeDate,
                  settledDate: try container.decode(Date.self, forKey: .settledDate),
                  interest: try container.decode(Currency.self, forKey: .interest, at: tradeDate),
@@ -151,4 +163,19 @@ public struct FirstradeRecordProvider: RecordProvider {
     }
     return try decoder.decode([FirstradeRecord].self, from: url)
   }
+}
+
+// MARK: - Parsing
+
+private let dividendReinvestPriceGroup = "Price"
+private let dividendReinvestPricePattern = Regex(#"REIN @ (?<Price>\d+\.\d+)"#)
+
+private func extractDividendReinvestPrice(from description: String) -> Decimal? {
+  guard
+    let dividendReinvestPriceMatch = dividendReinvestPricePattern.firstMatch(in: description),
+    let dividentReinvestPrice = dividendReinvestPriceMatch.group(named: dividendReinvestPriceGroup)
+  else {
+    return nil
+  }
+  return Decimal(string: dividentReinvestPrice.value)
 }
