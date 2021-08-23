@@ -150,9 +150,7 @@ extension FirstradeRecord: Record {
 }
 
 public struct FirstradeRecordProvider: RecordProvider {
-  public var filenamePattern: String {
-    #"Firstrade_\d{8}_\d{4}.csv"#
-  }
+  public let filenamePattern = #"Firstrade_\d{8}_\d{4}.csv"#
 
   public func read(contentsOf url: URL) throws -> [Record] {
     let decoder = CSVDecoder {

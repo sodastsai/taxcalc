@@ -123,9 +123,7 @@ extension SchwabEACRecord: Record {
 }
 
 public struct SchwabEACRecordProvider: RecordProvider {
-  public var filenamePattern: String {
-    #"Schwab_\d{8}_EAC_\d{4}.csv"#
-  }
+  public let filenamePattern = #"Schwab_\d{8}_EAC_\d{4}.csv"#
 
   public func read(contentsOf url: URL) throws -> [Record] {
     let fileContent = try String(contentsOf: url, encoding: .utf8)

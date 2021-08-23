@@ -128,9 +128,7 @@ extension SchwabIndividualRecord: Record {
 }
 
 public struct SchwabIndividualRecordProvider: RecordProvider {
-  public var filenamePattern: String {
-    #"Schwab_\d{8}_\d{4}.csv"#
-  }
+  public let filenamePattern = #"Schwab_\d{8}_\d{4}.csv"#
 
   public func read(contentsOf url: URL) throws -> [Record] {
     let fileContent = try String(contentsOf: url, encoding: .utf8)
