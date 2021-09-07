@@ -13,7 +13,8 @@ struct TaxCalculator: AsyncParsableCommand {
     let records = try RecorderLoader.default.load(from: recordsContainer)
     let (transactions, assetEvents) = try await records.groupedByRecordType()
 
-    let input = CalculatorInput(transactions: transactions, assetEvents: assetEvents)
+    let serializedRecords = serialize(transactions: transactions, assetEvents: assetEvents)
+    let input = try DefaultParser().calculatorInput(fromData: serializedRecords)
     let logger = BasicLogger()
     logger.level = .Warn
     let calculator = try Calculator(input: input, logger: logger)
