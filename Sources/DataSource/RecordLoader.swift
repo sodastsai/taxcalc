@@ -18,13 +18,17 @@ public struct RecorderLoader {
   }
 
   public func load(from container: URL) throws -> [Record] {
+    (try loadFiles(in: container)).reduce([], +).sorted(by: \.date)
+  }
+
+  public func loadFiles(in container: URL) throws -> [[Record]] {
     let fileURLs = try FileManager.default.contentsOfDirectory(at: container, includingPropertiesForKeys: [])
     return try fileURLs.compactMap { fileURL in
       guard let provider = try provider(of: fileURL) else {
         return nil
       }
       return try provider.read(contentsOf: fileURL)
-    }.reduce([], +).sorted(by: \.date)
+    }
   }
 }
 
