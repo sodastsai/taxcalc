@@ -104,18 +104,3 @@ extension Strategy.DecimalDecoding {
     }
   }
 }
-
-// MARK: - Misc
-
-extension String {
-  var rangeOfFullString: NSRange {
-    NSRange(startIndex ..< endIndex, in: self)
-  }
-
-  func substring(matching result: NSTextCheckingResult) -> Substring? {
-    guard let range = Range(result.range, in: self) else {
-      return nil
-    }
-    return self[range]
-  }
-}

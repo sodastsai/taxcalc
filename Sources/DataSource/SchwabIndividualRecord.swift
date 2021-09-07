@@ -4,6 +4,7 @@ import CGTCalcCore
 import CodableCSV
 import DataFormat
 import Foundation
+import Regex
 
 public struct SchwabIndividualRecord {
   public enum Action: String {
@@ -144,25 +145,26 @@ public struct SchwabIndividualRecordProvider: RecordProvider {
 
 // MARK: - Decoder
 
+private let datePattern = Regex(#"(\d{2}/\d{2}/\d{4})"#)
+
 // The "date" could be something like "MM/dd/yyyy as of MM/dd/yyyy"
 private extension KeyedDecodingContainer {
   func decodeDates(forKey key: Key) throws -> (Date, Date) {
     let string = try decode(String.self, forKey: key)
-    let pattern = try NSRegularExpression(pattern: #"(\d{2}/\d{2}/\d{4})"#)
-    let matches = pattern.matches(in: string, range: string.rangeOfFullString)
+    let matches = datePattern.allMatches(in: string)
     if matches.count == 1 {
+      let dateString = matches[0].value
       guard
-        let dateString = string.substring(matching: matches[0]),
         let date = dateFormatter.date(from: String(dateString))
       else {
         throw DecodingError.invalidDateString(string)
       }
       return (date, date)
     } else if matches.count == 2 {
+      let settledDateString = matches[0].value
+      let tradeDateString = matches[1].value
       guard
-        let settledDateString = string.substring(matching: matches[0]),
         let settledDate = dateFormatter.date(from: String(settledDateString)),
-        let tradeDateString = string.substring(matching: matches[1]),
         let tradeDate = dateFormatter.date(from: String(tradeDateString))
       else {
         throw DecodingError.invalidDateString(string)
