@@ -114,7 +114,7 @@ extension SchwabEACRecord: Record {
         kind: .Buy,
         date: date,
         asset: symbol,
-        amount: Decimal(quantity),
+        amount: Decimal(netSharesDeposited),
         price: try await fairMarketValue.converting(to: .GBP).amount,
         expenses: try await feesAndCommissions.converting(to: .GBP).amount
       ))
