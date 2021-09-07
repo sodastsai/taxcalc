@@ -8,7 +8,7 @@ import Foundation
 struct TaxCalculator: ParsableCommand {
   static var configuration = CommandConfiguration(
     abstract: "A utility for calculating UK CGT.",
-    subcommands: [RecordConverter.self]
+    subcommands: [Calculator.self, RecordConverter.self]
   )
 }
 
