@@ -132,9 +132,18 @@ extension FirstradeRecord: Record {
     }
   }
 
+  private static let stockSplitLinePattern = Regex(#"STK\sSPLIT\sON\s+(?<AddedValue>\d+(\.\d+))"#)
+
   public var type: DataSource.RecordType? {
     get async throws {
       if let transactionKind = transactionKind, let symbol = symbol {
+        if let stockSplitMatch = Self.stockSplitLinePattern.firstMatch(in: description),
+           let addedValueGroup = stockSplitMatch.group(named: "AddedValue"),
+           let splitAddedValue = Decimal(string: addedValueGroup.value) {
+          let addedQuantity = quantity / splitAddedValue
+          return .assetEvent(AssetEvent(kind: .Split(addedQuantity + 1), date: tradeDate, asset: symbol))
+        }
+
         return .transaction(Transaction(
           kind: transactionKind,
           date: tradeDate,
