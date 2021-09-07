@@ -9,11 +9,15 @@ protocol AsyncParsableCommand: ParsableCommand {
 
 extension ParsableCommand {
   static func main(_ arguments: [String]? = nil) async throws {
-    var command = try parseAsRoot(arguments)
-    if var asyncCommand = command as? AsyncParsableCommand {
-      try await asyncCommand.run()
-    } else {
-      try command.run()
+    do {
+      var command = try parseAsRoot(arguments)
+      if var asyncCommand = command as? AsyncParsableCommand {
+        try await asyncCommand.run()
+      } else {
+        try command.run()
+      }
+    } catch {
+      exit(withError: error)
     }
   }
 }
