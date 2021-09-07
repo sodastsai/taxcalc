@@ -10,7 +10,7 @@ public struct RecorderLoader {
     self.providers = providers
   }
 
-  func provider(of fileURL: URL) throws -> RecordProvider? {
+  public func provider(of fileURL: URL) throws -> RecordProvider? {
     let filename = fileURL.lastPathComponent
     return try providers.first {
       try Regex($0.filenamePattern).isMatched(by: filename)
