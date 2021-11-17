@@ -28,6 +28,7 @@ public struct SchwabIndividualRecord {
     case cancelBuy = "Cancel Buy"
     case journal = "Journal"
     case moneyLinkDeposit = "MoneyLink Deposit"
+    case moneyLinkTransfer = "MoneyLink Transfer"
   }
 
   public let action: Action
