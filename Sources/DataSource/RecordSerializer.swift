@@ -57,5 +57,6 @@ private extension AssetEvent {
 }
 
 public func serialize(transactions: [Transaction], assetEvents: [AssetEvent]) -> String {
-  (transactions.map(\.serializedString) + assetEvents.map(\.serializedString)).joined(separator: "\n")
+  let lines = transactions.map(\.serializedString) + assetEvents.map(\.serializedString) + ["\n"]
+  return lines.joined(separator: "\n")
 }
