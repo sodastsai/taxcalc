@@ -1,6 +1,7 @@
 //
 
 import ArgumentParser
+import CollectionConcurrencyKit
 import DataSource
 import Foundation
 
@@ -18,7 +19,30 @@ struct RecordConverter: AsyncParsableCommand {
   @Argument(help: "The output directory for storing the CGTCalc record")
   var outputDirectory: URL
 
+  private var inputFiles: [URL] {
+    if inputFile.isDirectiory {
+      guard let filePaths = try? FileManager.default.contentsOfDirectory(atPath: inputFile.path) else {
+        return []
+      }
+      return filePaths.map {
+        return inputFile.appendingPathComponent($0)
+      }
+    } else {
+      return [inputFile]
+    }
+  }
+
   func run() async throws {
+    try await inputFiles.concurrentForEach { fileURL in
+      do {
+        try await run(withFile: fileURL)
+      } catch Error.noProvider {
+        // Skip this file
+      }
+    }
+  }
+
+  private func run(withFile inputFile: URL) async throws {
     guard let provider = try RecorderLoader.default.provider(of: inputFile) else {
       throw Error.noProvider
     }
